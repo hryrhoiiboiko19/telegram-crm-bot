@@ -53,17 +53,17 @@ export async function adminExportSheets(ctx: BotContext) {
 export async function adminViewOrders(
   ctx: BotContext,
   paginationOffset: number = 0,
+  recentOrderUpdated: { orderId: number } = { orderId: 0 },
 ) {
   await ctx.answerCallbackQuery();
+  ctx.session.paginationOffset = paginationOffset;
 
   let haveToReply: boolean = false;
 
   if (ctx.callbackQuery?.data?.startsWith("admin_view_")) {
     haveToReply = true;
   }
-  const totalPendingCount: number =
-    ctx.session.pendingOrderCount ??
-    (await orderRepository.countTotalPending());
+  const totalPendingCount: number = await orderRepository.countTotalPending();
 
   const activeOrder = await orderRepository.findPendingOrder(paginationOffset);
 
@@ -73,6 +73,7 @@ export async function adminViewOrders(
     paginationOffset,
     totalPendingCount,
     haveToReply,
+    recentOrderUpdated,
   );
 }
 
@@ -82,12 +83,19 @@ function renderOrders(
   paginationOffset: number,
   totalPendingCount: number,
   haveToReply: boolean,
+  recentOrderUpdated: { orderId: number },
 ) {
   if (!order) {
     ctx.reply("No pending orders.");
     return;
   }
-  const orderDescription = `Service: ${order.serviceType}\nDescription: ${order.description}\n,Created At: ${order.createdAt}`;
+
+  let updatedString: string = "";
+
+  if (recentOrderUpdated.orderId != 0) {
+    updatedString = `Updated order with id: ${recentOrderUpdated.orderId}\n\n`;
+  }
+  const orderDescription = `${updatedString}Service: ${order.serviceType}\nDescription: ${order.description}\n,Created At: ${order.createdAt}`;
   const msgMarkup = {
     reply_markup: {
       inline_keyboard: keyboardTemplate(
@@ -174,7 +182,18 @@ export async function adminConfirmOrder(ctx: BotContext) {
 
   await orderRepository.updateStatus(orderId, "confirmed");
 
-  await ctx.editMessageText(`Order #${orderId} status updated to CONFIRMED.`);
+  //
+
+  const newTotal = await orderRepository.countTotalPending();
+  const offset = Math.max(
+    0,
+    Math.min(ctx.session.paginationOffset ?? 0, newTotal - 1),
+  );
+  newTotal === 0
+    ? await ctx.editMessageText(
+        `Order #${orderId} status updated to CONFIRMED.`,
+      )
+    : await adminViewOrders(ctx, offset, { orderId });
 }
 
 export async function adminCancelOrder(ctx: BotContext) {
@@ -184,7 +203,16 @@ export async function adminCancelOrder(ctx: BotContext) {
 
   await orderRepository.updateStatus(orderId, "cancelled");
 
-  await ctx.editMessageText(`Order #${orderId} status updated to CANCELLED.`);
+  const newTotal = await orderRepository.countTotalPending();
+  const offset = Math.max(
+    0,
+    Math.min(ctx.session.paginationOffset ?? 0, newTotal - 1),
+  );
+  newTotal === 0
+    ? await ctx.editMessageText(
+        `Order #${orderId} status updated to CANCELLED.`,
+      )
+    : await adminViewOrders(ctx, offset, { orderId });
 }
 
 export async function adminOrderPagination(ctx: BotContext) {

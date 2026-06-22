@@ -30,7 +30,7 @@ export const googleSheetsService: IGoogleSheetsService =
   new GoogleSheetsService();
 
 function initial(): SessionData {
-  return { pendingOrderCount: null };
+  return { paginationOffset: null };
 }
 
 bot.use(session({ initial }));

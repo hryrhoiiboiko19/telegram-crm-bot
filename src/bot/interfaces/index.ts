@@ -1,3 +1,3 @@
 export interface SessionData {
-  pendingOrderCount: number | null;
+  paginationOffset: number | null;
 }
