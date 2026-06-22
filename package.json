@@ -13,6 +13,8 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@grammyjs/conversations": "^2.1.1",
+    "@grammyjs/i18n": "^1.1.2",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
     "grammy": "^1.44.0",

@@ -1,4 +1,4 @@
-import { Logger } from "../utils/logger/index.js";
+import { Logger } from "../../utils/logger/index.js";
 import type { Middleware } from "grammy";
 
 export const loggerMiddleware: Middleware = async (ctx, next) => {
