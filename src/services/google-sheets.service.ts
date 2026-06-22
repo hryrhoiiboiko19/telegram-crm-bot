@@ -14,24 +14,25 @@ export class GoogleSheetsService implements IGoogleSheetsService {
       const webhookUrl = env.GOOGLE_SHEETS_WEBHOOK_URL;
 
       const formattedRows = ordersMatrix.map((order) => {
-        return {
-          id: order.id,
-          userId: order.userId,
-          serviceType: order.serviceType,
-          description: order.description || "N/A",
-          status: order.status,
-          createdAt: order.createdAt.toISOString(),
-        };
+        return [
+          order.id.toString(),
+          order.userId.toString(),
+          order.serviceType,
+          order.description || "N/A",
+          order.status,
+        ];
       });
 
       const response = await fetch(webhookUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formattedRows),
+        body: JSON.stringify({ data: formattedRows }),
       });
 
-      if (response.status != 200) {
-        new Error("Failed to push data to Google Sheets");
+      if (!response.ok) {
+        throw new Error(
+          `Google Sheets Webhook returned status: ${response.status}`,
+        );
       }
       Logger.info("Google Sheets export finished successfully!");
       return true;
