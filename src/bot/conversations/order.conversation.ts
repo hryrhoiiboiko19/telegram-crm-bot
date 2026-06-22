@@ -1,10 +1,10 @@
 import { Conversation } from "@grammyjs/conversations";
+import { orderRepository } from "../../repositories/order.repository.js";
+import { userRepository } from "../../repositories/user.repository.js";
+import { Logger } from "../../utils/logger/index.js";
+import { i18nMiddleware } from "../middlewares/i18n.middleware.js";
+import { BotContext } from "../types/index.js";
 import { Context } from "grammy";
-import { BotContext } from "../bot/types/index.js";
-import { i18nMiddleware } from "../bot/middlewares/i18n.middleware.js";
-import { Logger } from "../utils/logger/index.js";
-import { userRepository } from "../repositories/user.repository.js";
-import { orderRepository } from "../repositories/order.repository.js";
 
 export async function orderConversation(
   conversation: Conversation<Context, BotContext>,

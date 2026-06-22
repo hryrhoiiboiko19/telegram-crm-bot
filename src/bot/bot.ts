@@ -6,11 +6,26 @@ import {
   conversations,
   createConversation,
 } from "@grammyjs/conversations";
-import { orderConversation } from "../conversations.ts/index.js";
 import { i18nMiddleware, loggerMiddleware } from "./middlewares/index.js";
-import { start } from "./handlers/commands.js";
+import { orderConversation } from "./conversations/index.js";
+import {
+  GoogleSheetsService,
+  IGoogleSheetsService,
+} from "../services/google-sheets.service.js";
+import {
+  admin,
+  adminCancelOrder,
+  adminConfirmOrder,
+  adminExportSheets,
+  adminViewOrders,
+  order,
+  start,
+} from "./handlers/index.js";
 
-const bot = new Bot<ConversationFlavor<BotContext>>(env.BOT_TOKEN);
+export const bot = new Bot<ConversationFlavor<BotContext>>(env.BOT_TOKEN);
+
+export const googleSheetsService: IGoogleSheetsService =
+  new GoogleSheetsService();
 
 bot.use(session({ initial: () => ({}) }));
 bot.use(loggerMiddleware);
@@ -19,7 +34,18 @@ bot.use(conversations());
 bot.use(createConversation(orderConversation));
 
 bot.command("start", (ctx) => start(ctx));
-bot.command("order", (ctx) => ctx.conversation.enter("orderConversation"));
+bot.command("admin", (ctx) => admin(ctx));
+bot.command("order", (ctx) => order(ctx));
+
 bot.on("message", (ctx) => ctx.reply(ctx.t("unknown_command")));
+
+bot.callbackQuery("admin_export_sheets", async (ctx) => adminExportSheets(ctx));
+bot.callbackQuery("admin_view_orders", async (ctx) => adminViewOrders(ctx));
+bot.callbackQuery(/^admin_confirm_order_(\d+)$/, async (ctx) =>
+  adminConfirmOrder(ctx),
+);
+bot.callbackQuery(/^admin_cancel_order_(\d+)$/, async (ctx) =>
+  adminCancelOrder(ctx),
+);
 
 bot.start();

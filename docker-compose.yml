@@ -14,6 +14,8 @@ services:
       - BOT_MODE=${BOT_MODE} # polling / webhook
       - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-crm_db}
       - WEBHOOK_URL=${WEBHOOK_URL}
+      - GOOGLE_SHEETS_WEBHOOK_URL=${GOOGLE_SHEETS_WEBHOOK_URL}
+      - ADMIN_IDS=${ADMIN_IDS}
       - PORT=3000
     depends_on:
       postgres:

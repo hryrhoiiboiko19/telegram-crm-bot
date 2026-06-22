@@ -44,7 +44,7 @@ export const orderRepository = {
   },
 
   /**
-   * Fetch all orders in the system (useful for Google Sheets export or admin panel)
+   * Fetch all orders in the system
    */
   async findAll(): Promise<Order[]> {
     try {
@@ -60,6 +60,30 @@ export const orderRepository = {
     } catch (error) {
       Logger.error([
         "Failed to fetch all orders from database",
+        error as Error,
+      ]);
+      throw error;
+    }
+  },
+
+  /**
+   * Fetch all orders in the system with status "pending"
+   */
+  async findPending(): Promise<Order[]> {
+    try {
+      const results = await db
+        .select()
+        .from(orders)
+        .where((order) => eq(order.status, "pending"))
+        .orderBy(desc(orders.createdAt));
+
+      Logger.info(
+        `Fetched all orders from database with status "pending". Total count: ${results.length}`,
+      );
+      return results;
+    } catch (error) {
+      Logger.error([
+        "Failed to fetch all orders with status 'pending' from database",
         error as Error,
       ]);
       throw error;
