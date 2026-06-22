@@ -69,21 +69,46 @@ export const orderRepository = {
   /**
    * Fetch all orders in the system with status "pending"
    */
-  async findPending(): Promise<Order[]> {
+  async findPendingOrder(
+    offset: number = 0,
+    limit: number = 1,
+  ): Promise<Order | null> {
     try {
       const results = await db
         .select()
         .from(orders)
         .where((order) => eq(order.status, "pending"))
+        .offset(offset)
+        .limit(limit)
         .orderBy(desc(orders.createdAt));
 
       Logger.info(
         `Fetched all orders from database with status "pending". Total count: ${results.length}`,
       );
-      return results;
+      return results[0] ?? null;
     } catch (error) {
       Logger.error([
         "Failed to fetch all orders with status 'pending' from database",
+        error as Error,
+      ]);
+      throw error;
+    }
+  },
+
+  async countTotalPending(): Promise<number> {
+    try {
+      const results = await db
+        .select()
+        .from(orders)
+        .where((order) => eq(order.status, "pending"));
+
+      Logger.info(
+        `Fetched count of orders from database with status "pending". Total count: ${results.length}`,
+      );
+      return results.length;
+    } catch (error) {
+      Logger.error([
+        "Failed to fetch count of orders with status 'pending' from database",
         error as Error,
       ]);
       throw error;

@@ -17,17 +17,23 @@ import {
   adminCancelOrder,
   adminConfirmOrder,
   adminExportSheets,
+  adminOrderPagination,
   adminViewOrders,
   order,
   start,
 } from "./handlers/index.js";
+import { SessionData } from "./interfaces/index.js";
 
 export const bot = new Bot<ConversationFlavor<BotContext>>(env.BOT_TOKEN);
 
 export const googleSheetsService: IGoogleSheetsService =
   new GoogleSheetsService();
 
-bot.use(session({ initial: () => ({}) }));
+function initial(): SessionData {
+  return { pendingOrderCount: null };
+}
+
+bot.use(session({ initial }));
 bot.use(loggerMiddleware);
 bot.use(i18nMiddleware);
 bot.use(conversations());
@@ -47,5 +53,9 @@ bot.callbackQuery(/^admin_confirm_order_(\d+)$/, async (ctx) =>
 bot.callbackQuery(/^admin_cancel_order_(\d+)$/, async (ctx) =>
   adminCancelOrder(ctx),
 );
+bot.callbackQuery(/^admin_order_pagination_offset_(\d+)$/, async (ctx) =>
+  adminOrderPagination(ctx),
+);
+bot.callbackQuery("noop", async (ctx) => ctx.answerCallbackQuery());
 
 bot.start();
