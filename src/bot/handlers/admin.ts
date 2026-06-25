@@ -1,9 +1,9 @@
 import { InlineKeyboardButton } from "grammy/types";
 import { env } from "../../config/env.js";
 import { BotContext } from "../types/index.js";
-import { googleSheetsService } from "../bot.js";
 import { orderRepository } from "../../repositories/order.repository.js";
 import { Order } from "../../database/schema.js";
+import { googleSheetsService } from "../../services/google-sheets.service.js";
 
 const adminIds = env.ADMIN_IDS.split(",");
 

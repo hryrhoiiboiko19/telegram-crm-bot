@@ -9,10 +9,6 @@ import {
 import { i18nMiddleware, loggerMiddleware } from "./middlewares/index.js";
 import { orderConversation } from "./conversations/index.js";
 import {
-  GoogleSheetsService,
-  IGoogleSheetsService,
-} from "../services/google-sheets.service.js";
-import {
   admin,
   adminCancelOrder,
   adminConfirmOrder,
@@ -23,17 +19,24 @@ import {
   start,
 } from "./handlers/index.js";
 import { SessionData } from "./interfaces/index.js";
+import { RedisAdapter } from "@grammyjs/storage-redis";
+import { Redis } from "ioredis";
 
 export const bot = new Bot<ConversationFlavor<BotContext>>(env.BOT_TOKEN);
-
-export const googleSheetsService: IGoogleSheetsService =
-  new GoogleSheetsService();
 
 function initial(): SessionData {
   return { paginationOffset: null };
 }
 
-bot.use(session({ initial }));
+const redis = new Redis({
+  host: env.REDIS.HOST,
+  port: env.REDIS.PORT,
+  password: env.REDIS.PASSWORD,
+});
+
+const redisAdapter = new RedisAdapter({ instance: redis });
+
+bot.use(session({ initial, storage: redisAdapter }));
 bot.use(loggerMiddleware);
 bot.use(i18nMiddleware);
 bot.use(conversations());

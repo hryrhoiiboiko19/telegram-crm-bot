@@ -42,3 +42,6 @@ export class GoogleSheetsService implements IGoogleSheetsService {
     }
   }
 }
+
+export const googleSheetsService: IGoogleSheetsService =
+  new GoogleSheetsService();
