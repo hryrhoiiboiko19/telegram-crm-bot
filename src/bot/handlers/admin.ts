@@ -5,9 +5,7 @@ import { orderRepository } from "../../repositories/order.repository.js";
 import { Order } from "../../database/schema.js";
 import { googleSheetsService } from "../../services/google-sheets.service.js";
 import { addNotificationJob } from "../../queue/notification.queue.js";
-import { availableLocales } from "../constants/index.js";
-
-const adminIds = env.ADMIN_IDS.split(",");
+import { adminIds, availableLocales } from "../constants/index.js";
 
 export async function admin(ctx: BotContext) {
   if (!adminIds.includes(String(ctx.from?.id))) {
