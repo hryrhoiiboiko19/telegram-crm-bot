@@ -41,7 +41,7 @@ export async function adminExportSheets(ctx: BotContext) {
   const success = await googleSheetsService.exportOrders(allOrders);
 
   if (success) {
-    await ctx.reply(ctx.t("admin_successfull_export"));
+    await ctx.reply(ctx.t("admin_successful_export"));
   } else {
     await ctx.reply(ctx.t("admin_failed_export"));
   }
@@ -83,7 +83,7 @@ function renderOrders(
   recentOrderUpdated: { orderId: number },
 ) {
   if (!order) {
-    ctx.reply("No pending orders.");
+    ctx.reply(ctx.t("admin_no_pending_orders"));
     return;
   }
 
@@ -209,7 +209,10 @@ async function handleOrderStatusUpdate(
   );
   newTotal === 0
     ? await ctx.editMessageText(
-        `Order #${orderId} status updated to ${status}.`,
+        ctx.t("admin_order_status_updated", {
+          orderId,
+          status,
+        }),
       )
     : await adminViewOrders(ctx, offset, { orderId });
 }

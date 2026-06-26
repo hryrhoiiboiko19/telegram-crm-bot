@@ -35,7 +35,7 @@ export async function orderConversation(
     ctx.reply(t("invalid_service_type"));
   }
 
-  ctx.reply(t("serivce_problem_description"));
+  ctx.reply(t("service_problem_description"));
 
   let description: string | null;
   while (true) {
@@ -107,5 +107,5 @@ export async function orderConversation(
 
   Logger.info("Successfully saved data to Database!");
 
-  ctx.reply(t("order_recieved"));
+  ctx.reply(t("order_received"));
 }

@@ -1,31 +1,42 @@
-start = Welcome to bot! Type /order to make order
-unknown_command = Unkown command, type /start for instructions to use the bot
-contact_request = Send us your contact
-send_contact = Send
-service_request = Send us the type of service you want to
-serivce_problem_description = send the description of the problem for service
-order_recieved = Thanks! Your order recieved!
+## ===== General =====
+start = Welcome to the CRM bot! Type /order to place an order.
+unknown_command = Unknown command. Type /start for usage instructions.
+
+## ===== Order conversation =====
+service_request = Please send the type of service you want to request.
+service_problem_description = Please send a description of the problem for this service.
+contact_request = Please share your contact so we can reach you.
+send_contact = Share contact
+order_received = Thank you! Your order has been received.
+
+## ===== Validation errors =====
 invalid_service_type = Invalid service type. Please send a text between 3 and 255 characters.
 invalid_description = Invalid description. Please send a text between 3 and 2000 characters.
 invalid_phone_format = Invalid phone format. Please send a valid number like +380XXXXXXXXX, or use the button below to share your contact.
-admin_access_denied=Access denied. You are not an administrator.
-admin_greetings=Welcome to Admin CRM panel. Select an option or type /stats:
-admin_export=📊 Export to Google Sheets
-admin_view_active_orders=📦 View Active Orders
-admin_fetching_orders=Fetching orders and generating report...
-admin_successfull_export=Data successfully exported! Check your spreadsheet.
-admin_failed_export=Export failed. Please check backend container logs.
-admin_order_approve=✅ Confirm
-admin_order_cancel=❌ Cancel
-admin_get_stats = 📊 There is all-time stats of:
+
+## ===== Admin =====
+admin_access_denied = Access denied. You are not an administrator.
+admin_greetings = Welcome to the Admin CRM panel. Select an option or type /stats:
+admin_export = 📊 Export to Google Sheets
+admin_view_active_orders = 📦 View Active Orders
+admin_fetching_orders = Fetching orders and generating report…
+admin_successful_export = Data successfully exported! Check your spreadsheet.
+admin_failed_export = Export failed. Please check the backend container logs.
+admin_order_approve = ✅ Confirm
+admin_order_cancel = ❌ Cancel
+admin_no_pending_orders = No pending orders.
+admin_order_status_updated = Order #{$orderId} status updated to {$status}.
+admin_get_stats = 📊 All-time statistics:
   ------------------------
   ⏳ Pending orders: {$pending}
   ✅ Confirmed orders: {$confirmed}
-  📈 Conversion Rate: {$conversionRate}%
+  📈 Conversion rate: {$conversionRate}%
   🛠️ Most popular service: "{$mostPopularService}"
 admin_update_order = {$updatedString}
   Service: {$serviceType}
   Description: {$description}
-  Created At: {$createdAt}`
-admin_order_updated = Updated order with id: {$orderId}
-order_update_notification=🔔 Update on Order #{$orderId} The status of your order has been updated to: {$status}
+  Created at: {$createdAt}
+admin_order_updated = Updated order with ID: {$orderId}
+
+## ===== Notifications =====
+order_update_notification = 🔔 Update on Order #{$orderId}: the status of your order has been updated to: {$status}
