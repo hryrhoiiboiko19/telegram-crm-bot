@@ -90,9 +90,16 @@ function renderOrders(
   let updatedString: string = "";
 
   if (recentOrderUpdated.orderId != 0) {
-    updatedString = `Updated order with id: ${recentOrderUpdated.orderId}\n\n`;
+    updatedString = ctx.t("admin_order_updated", {
+      orderId: recentOrderUpdated.orderId,
+    });
   }
-  const orderDescription = `${updatedString}Service: ${order.serviceType}\nDescription: ${order.description}\n,Created At: ${order.createdAt}`;
+  const orderDescription = ctx.t("admin_update_order", {
+    updatedString,
+    serviceType: order.serviceType,
+    description: order.description ?? "",
+    createdAt: order.createdAt,
+  });
   const msgMarkup = {
     reply_markup: {
       inline_keyboard: keyboardTemplate(

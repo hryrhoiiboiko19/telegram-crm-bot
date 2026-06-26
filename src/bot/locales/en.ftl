@@ -6,7 +6,7 @@ service_request = Send us the type of service you want to
 serivce_problem_description = send the description of the problem for service
 order_recieved = Thanks! Your order recieved!
 admin_access_denied=Access denied. You are not an administrator.
-admin_greetings=Welcome to Admin CRM panel. Select an option:
+admin_greetings=Welcome to Admin CRM panel. Select an option or type /stats:
 admin_export=📊 Export to Google Sheets
 admin_view_active_orders=📦 View Active Orders
 admin_fetching_orders=Fetching orders and generating report...
@@ -20,4 +20,9 @@ admin_get_stats = 📊 There is all-time stats of:
   ✅ Confirmed orders: {$confirmed}
   📈 Conversion Rate: {$conversionRate}%
   🛠️ Most popular service: "{$mostPopularService}"
+admin_update_order = {$updatedString}
+  Service: {$serviceType}
+  Description: {$description}
+  Created At: {$createdAt}`
+admin_order_updated = Updated order with id: {$orderId}
 order_update_notification=🔔 Update on Order #{$orderId} The status of your order has been updated to: {$status}
