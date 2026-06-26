@@ -182,7 +182,14 @@ export const orderRepository = {
     }
   },
 
-  async getStats() {
+  async getStats(): Promise<{
+    pending: number;
+    confirmed: number;
+    completed: number;
+    cancelled: number;
+    conversionRate: number;
+    mostPopularService: string | null;
+  }> {
     try {
       Logger.info("Start collecting stats for admin dashboard");
 
@@ -216,13 +223,18 @@ export const orderRepository = {
       const cancelled =
         groupedByStatus.find((x) => x.status === orderStatusEnum.enumValues[3])
           ?.count ?? 0;
-      const conversionRate = completed / (completed + cancelled) || 0 * 100;
+      const conversionRate =
+        completed + cancelled > 0
+          ? Math.round((completed / (completed + cancelled)) * 100)
+          : 0;
 
       return {
         pending,
         confirmed,
-        mostPopularService: mostPopularService[0].serviceType,
+        completed,
+        cancelled,
         conversionRate,
+        mostPopularService: mostPopularService[0]?.serviceType ?? null,
       };
     } catch (error) {
       Logger.error([

@@ -26,10 +26,15 @@ admin_order_approve = ✅ Підтвердити
 admin_order_cancel = ❌ Скасувати
 admin_no_pending_orders = Немає замовлень у черзі.
 admin_order_status_updated = Замовлення #{$orderId}: статус змінено на {$status}.
-admin_get_stats = 📊 Загальна статистика за весь час:
+admin_broadcast_missing_message = Надішліть текст повідомлення. Використання: /broadcast <текст>
+admin_broadcast_started = 📣 Розсилку почато, надсилаємо {$count} користувачам…
+admin_broadcast_success = ✅ Розсилку завершено: {$success} доставлено, {$failed} не вдалося.
+admin_get_stats = 📊 CRM Бізнес-аналітика:
   ------------------------
   ⏳ Замовлень у черзі: {$pending}
   ✅ Підтверджених замовлень: {$confirmed}
+  ✔️ Виконаних замовлень: {$completed}
+  ❌ Скасувань: {$cancelled}
   📈 Конверсія: {$conversionRate}%
   🛠️ Найпопулярніша послуга: "{$mostPopularService}"
 admin_update_order = {$updatedString}

@@ -10,6 +10,7 @@ import { i18nMiddleware, loggerMiddleware } from "./middlewares/index.js";
 import { orderConversation } from "./conversations/index.js";
 import {
   admin,
+  adminBroadcast,
   adminCancelOrder,
   adminConfirmOrder,
   adminExportSheets,
@@ -42,6 +43,7 @@ bot.use(createConversation(orderConversation));
 bot.command("start", (ctx) => start(ctx));
 bot.command("admin", (ctx) => admin(ctx));
 bot.command("stats", (ctx) => adminStats(ctx));
+bot.command("broadcast", (ctx) => adminBroadcast(ctx));
 bot.command("order", (ctx) => order(ctx));
 
 bot.on("message", (ctx) => ctx.reply(ctx.t("unknown_command")));

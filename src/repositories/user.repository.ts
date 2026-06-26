@@ -72,4 +72,19 @@ export const userRepository = {
       throw error;
     }
   },
+
+  /**
+   * Fetch all users in the system (used for /broadcast)
+   */
+  async findAll(): Promise<User[]> {
+    try {
+      const results = await db.select().from(users);
+
+      Logger.info(`Fetched all users from database. Total count: ${results.length}`);
+      return results;
+    } catch (error) {
+      Logger.error(["Failed to fetch all users from database", error as Error]);
+      throw error;
+    }
+  },
 };

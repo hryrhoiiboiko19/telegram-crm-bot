@@ -26,10 +26,15 @@ admin_order_approve = ✅ Confirm
 admin_order_cancel = ❌ Cancel
 admin_no_pending_orders = No pending orders.
 admin_order_status_updated = Order #{$orderId} status updated to {$status}.
-admin_get_stats = 📊 All-time statistics:
+admin_broadcast_missing_message = Please provide a message. Usage: /broadcast <message>
+admin_broadcast_started = 📣 Broadcast started, sending to {$count} users…
+admin_broadcast_success = ✅ Broadcast finished: {$success} delivered, {$failed} failed.
+admin_get_stats = 📊 CRM Business Analytics:
   ------------------------
   ⏳ Pending orders: {$pending}
   ✅ Confirmed orders: {$confirmed}
+  ✔️ Completed orders: {$completed}
+  ❌ Cancelled orders: {$cancelled}
   📈 Conversion rate: {$conversionRate}%
   🛠️ Most popular service: "{$mostPopularService}"
 admin_update_order = {$updatedString}
