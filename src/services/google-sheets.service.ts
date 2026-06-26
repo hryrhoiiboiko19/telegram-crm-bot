@@ -8,6 +8,8 @@ export interface IGoogleSheetsService {
 
 export class GoogleSheetsService implements IGoogleSheetsService {
   async exportOrders(ordersMatrix: Order[]): Promise<boolean> {
+    const endProfile = Logger.profile("Google Sheets Export");
+
     try {
       Logger.info("Starting Google Sheets export process...");
 
@@ -39,6 +41,8 @@ export class GoogleSheetsService implements IGoogleSheetsService {
     } catch (err) {
       Logger.error(["Google Sheets export service failed", err as Error]);
       return false;
+    } finally {
+      endProfile();
     }
   }
 }

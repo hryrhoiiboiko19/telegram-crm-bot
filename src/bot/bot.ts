@@ -6,7 +6,7 @@ import {
   conversations,
   createConversation,
 } from "@grammyjs/conversations";
-import { i18nMiddleware, loggerMiddleware } from "./middlewares/index.js";
+import { i18nMiddleware, loggerMiddleware, setupErrorBoundary } from "./middlewares/index.js";
 import { orderConversation } from "./conversations/index.js";
 import {
   admin,
@@ -39,6 +39,8 @@ bot.use(loggerMiddleware);
 bot.use(i18nMiddleware);
 bot.use(conversations());
 bot.use(createConversation(orderConversation));
+
+setupErrorBoundary(bot);
 
 bot.command("start", (ctx) => start(ctx));
 bot.command("admin", (ctx) => admin(ctx));
