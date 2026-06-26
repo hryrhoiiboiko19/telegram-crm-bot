@@ -1,9 +1,9 @@
 import "dotenv";
 
 const redisConfig = {
-  PASSWORD: process.env.REDIS_PASSWORD!,
-  HOST: process.env.REDIS_HOST || "redis",
-  PORT: Number(process.env.REDIS_PORT) || 6379,
+  password: process.env.REDIS_PASSWORD!,
+  host: process.env.REDIS_HOST || "redis",
+  port: Number(process.env.REDIS_PORT) || 6379,
 };
 
 export const env = {

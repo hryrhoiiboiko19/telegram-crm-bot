@@ -4,6 +4,9 @@ import { BotContext } from "../types/index.js";
 import { orderRepository } from "../../repositories/order.repository.js";
 import { Order } from "../../database/schema.js";
 import { googleSheetsService } from "../../services/google-sheets.service.js";
+import { userRepository } from "../../repositories/user.repository.js";
+import { addNotificationJob } from "../../queue/notification.queue.js";
+import { availableLocales } from "../constants/index.js";
 
 const adminIds = env.ADMIN_IDS.split(",");
 
@@ -176,13 +179,27 @@ const keyboardTemplate = (
 };
 
 export async function adminConfirmOrder(ctx: BotContext) {
+  await handleOrderStatusUpdate(ctx, "confirmed", "CONFIRMED");
+
+  await handleAddNotificationJob(ctx, "confirmed");
+}
+
+export async function adminCancelOrder(ctx: BotContext) {
+  await handleOrderStatusUpdate(ctx, "cancelled", "CANCELLED");
+
+  await handleAddNotificationJob(ctx, "cancelled");
+}
+
+async function handleOrderStatusUpdate(
+  ctx: BotContext,
+  dbStatus: "confirmed" | "cancelled",
+  status: "CONFIRMED" | "CANCELLED",
+): Promise<void> {
   await ctx.answerCallbackQuery();
 
   const orderId = parseInt(ctx.match![1]);
 
-  await orderRepository.updateStatus(orderId, "confirmed");
-
-  //
+  await orderRepository.updateStatus(orderId, dbStatus);
 
   const newTotal = await orderRepository.countTotalPending();
   const offset = Math.max(
@@ -191,28 +208,28 @@ export async function adminConfirmOrder(ctx: BotContext) {
   );
   newTotal === 0
     ? await ctx.editMessageText(
-        `Order #${orderId} status updated to CONFIRMED.`,
+        `Order #${orderId} status updated to ${status}.`,
       )
     : await adminViewOrders(ctx, offset, { orderId });
 }
 
-export async function adminCancelOrder(ctx: BotContext) {
-  await ctx.answerCallbackQuery();
-
+async function handleAddNotificationJob(
+  ctx: BotContext,
+  newStatus: "confirmed" | "cancelled",
+) {
+  const user = await userRepository.findByTelegramId(String(ctx.from?.id));
+  const userId = user!.id;
   const orderId = parseInt(ctx.match![1]);
+  const userLocale = availableLocales.includes(ctx.from!.language_code!)
+    ? ctx.from!.language_code!
+    : "en";
 
-  await orderRepository.updateStatus(orderId, "cancelled");
-
-  const newTotal = await orderRepository.countTotalPending();
-  const offset = Math.max(
-    0,
-    Math.min(ctx.session.paginationOffset ?? 0, newTotal - 1),
-  );
-  newTotal === 0
-    ? await ctx.editMessageText(
-        `Order #${orderId} status updated to CANCELLED.`,
-      )
-    : await adminViewOrders(ctx, offset, { orderId });
+  await addNotificationJob({
+    userId,
+    orderId,
+    newStatus,
+    userLocale,
+  });
 }
 
 export async function adminOrderPagination(ctx: BotContext) {

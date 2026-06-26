@@ -28,11 +28,7 @@ function initial(): SessionData {
   return { paginationOffset: null };
 }
 
-const redis = new Redis({
-  host: env.REDIS.HOST,
-  port: env.REDIS.PORT,
-  password: env.REDIS.PASSWORD,
-});
+const redis = new Redis(env.REDIS);
 
 const redisAdapter = new RedisAdapter({ instance: redis });
 
@@ -60,5 +56,3 @@ bot.callbackQuery(/^admin_order_pagination_offset_(\d+)$/, async (ctx) =>
   adminOrderPagination(ctx),
 );
 bot.callbackQuery("noop", async (ctx) => ctx.answerCallbackQuery());
-
-bot.start();

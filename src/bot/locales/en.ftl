@@ -14,3 +14,4 @@ admin_successfull_export=Data successfully exported! Check your spreadsheet.
 admin_failed_export=Export failed. Please check backend container logs.
 admin_order_approve=✅ Confirm
 admin_order_cancel=❌ Cancel
+order_update_notification=`🔔 **Update on Order #{$orderId}**\n\nThe status of your order has been updated to: **{$status}**`;

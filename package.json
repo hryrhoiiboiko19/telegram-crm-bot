@@ -1,9 +1,9 @@
 {
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/bot/bot.ts",
+    "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "start": "node dist/bot/bot.js",
+    "start": "node dist/index.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",

@@ -1,8 +1,7 @@
 export interface NotificationJobData {
   userId: number;
-  userLocale: string; // From session
+  userLocale: string;
   orderId: number;
-  oldStatus?: string;
   newStatus: string;
 }
 
