@@ -14,6 +14,8 @@ export async function orderConversation(
   const locale = ctx.from?.language_code ?? "en";
   const t = (key: string) => i18nMiddleware.translate(locale, key);
 
+  Logger.info(`Order conversation started for user ${ctx.from?.id}`);
+
   ctx.reply(t("service_request"));
 
   let serviceType: string;

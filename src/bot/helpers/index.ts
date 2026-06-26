@@ -10,5 +10,6 @@ export async function isAdmin(ctx: BotContext): Promise<boolean> {
     await ctx.reply(ctx.t("admin_access_denied"));
     return false;
   }
+  Logger.info(`Admin access granted to user ${ctx.from?.id}`);
   return true;
 }

@@ -2,15 +2,14 @@ import { InlineKeyboardButton } from "grammy/types";
 import { BotContext } from "../types/index.js";
 import { orderRepository } from "../../repositories/order.repository.js";
 import { userRepository } from "../../repositories/user.repository.js";
-import { Order } from "../../database/schema.js";
 import { googleSheetsService } from "../../services/google-sheets.service.js";
-import { addNotificationJob } from "../../queue/notification.queue.js";
-import { availableLocales } from "../constants/index.js";
 import { isAdmin } from "../helpers/index.js";
 import { Logger } from "../../utils/logger/index.js";
 
 export async function admin(ctx: BotContext) {
   if (!isAdmin(ctx)) return;
+
+  Logger.info(`Admin panel opened by user ${ctx.from?.id}`);
 
   const inline_keyboard: InlineKeyboardButton[][] = [
     [
@@ -38,220 +37,24 @@ export async function adminExportSheets(ctx: BotContext) {
   await ctx.answerCallbackQuery();
   await ctx.reply(ctx.t("admin_fetching_orders"));
 
-  const allOrders = await orderRepository.findAll();
+  Logger.info(`Admin ${ctx.from?.id} triggered Google Sheets export`);
 
+  const allOrders = await orderRepository.findAll();
   const success = await googleSheetsService.exportOrders(allOrders);
 
   if (success) {
+    Logger.info("Google Sheets export completed successfully");
     await ctx.reply(ctx.t("admin_successful_export"));
   } else {
+    Logger.warn("Google Sheets export failed");
     await ctx.reply(ctx.t("admin_failed_export"));
   }
 }
 
-export async function adminViewOrders(
-  ctx: BotContext,
-  paginationOffset: number = 0,
-  recentOrderUpdated: { orderId: number } = { orderId: 0 },
-) {
-  await ctx.answerCallbackQuery();
-  ctx.session.paginationOffset = paginationOffset;
-
-  let haveToReply: boolean = false;
-
-  if (ctx.callbackQuery?.data?.startsWith("admin_view_")) {
-    haveToReply = true;
-  }
-  const totalPendingCount: number = await orderRepository.countTotalPending();
-
-  const activeOrder = await orderRepository.findPendingOrder(paginationOffset);
-
-  renderOrders(
-    ctx,
-    activeOrder,
-    paginationOffset,
-    totalPendingCount,
-    haveToReply,
-    recentOrderUpdated,
-  );
-}
-
-function renderOrders(
-  ctx: BotContext,
-  order: Order | null,
-  paginationOffset: number,
-  totalPendingCount: number,
-  haveToReply: boolean,
-  recentOrderUpdated: { orderId: number },
-) {
-  if (!order) {
-    ctx.reply(ctx.t("admin_no_pending_orders"));
-    return;
-  }
-
-  let updatedString: string = "";
-
-  if (recentOrderUpdated.orderId != 0) {
-    updatedString = ctx.t("admin_order_updated", {
-      orderId: recentOrderUpdated.orderId,
-    });
-  }
-  const orderDescription = ctx.t("admin_update_order", {
-    updatedString,
-    serviceType: order.serviceType,
-    description: order.description ?? "",
-    createdAt: order.createdAt,
-  });
-  const msgMarkup = {
-    reply_markup: {
-      inline_keyboard: keyboardTemplate(
-        ctx,
-        order.id,
-        paginationOffset,
-        totalPendingCount,
-      ),
-    },
-  };
-  if (haveToReply) {
-    ctx.reply(orderDescription, msgMarkup);
-  } else {
-    ctx.editMessageText(orderDescription, msgMarkup);
-  }
-}
-
-function leftPaginationArrow(
-  paginationOffset: number,
-  _totalPendingCount: number,
-): InlineKeyboardButton {
-  const text: string = paginationOffset === 0 ? "⬛" : "⬅️";
-  const callback_data: string =
-    paginationOffset === 0
-      ? "noop"
-      : `admin_order_pagination_offset_${paginationOffset - 1}`;
-
-  return {
-    text,
-    callback_data,
-  };
-}
-
-function rightPaginationArrow(
-  paginationOffset: number,
-  totalPendingCount: number,
-): InlineKeyboardButton {
-  const text: string =
-    totalPendingCount - paginationOffset <= 1 // we are counting the last remaining order, that's why 1
-      ? "⬛"
-      : "➡️";
-  const callback_data: string =
-    totalPendingCount - paginationOffset <= 1
-      ? "noop"
-      : `admin_order_pagination_offset_${paginationOffset + 1}`;
-
-  return {
-    text,
-    callback_data,
-  };
-}
-
-const keyboardTemplate = (
-  ctx: BotContext,
-  orderId: number,
-  paginationOffset: number,
-  totalPendingCount: number,
-): InlineKeyboardButton[][] => {
-  return [
-    [
-      {
-        text: ctx.t("admin_order_approve"),
-        callback_data: `admin_confirm_order_${orderId}`,
-      },
-    ],
-    [
-      {
-        text: ctx.t("admin_order_cancel"),
-        callback_data: `admin_cancel_order_${orderId}`,
-      },
-    ],
-    [
-      leftPaginationArrow(paginationOffset, totalPendingCount),
-      { text: "⬛", callback_data: "noop" },
-      rightPaginationArrow(paginationOffset, totalPendingCount),
-    ],
-  ];
-};
-
-export async function adminConfirmOrder(ctx: BotContext) {
-  await handleOrderStatusUpdate(ctx, "confirmed", "CONFIRMED");
-
-  await handleAddNotificationJob(ctx, "confirmed");
-}
-
-export async function adminCancelOrder(ctx: BotContext) {
-  await handleOrderStatusUpdate(ctx, "cancelled", "CANCELLED");
-
-  await handleAddNotificationJob(ctx, "cancelled");
-}
-
-async function handleOrderStatusUpdate(
-  ctx: BotContext,
-  dbStatus: "confirmed" | "cancelled",
-  status: "CONFIRMED" | "CANCELLED",
-): Promise<void> {
-  await ctx.answerCallbackQuery();
-
-  const orderId = parseInt(ctx.match![1]);
-
-  await orderRepository.updateStatus(orderId, dbStatus);
-
-  const newTotal = await orderRepository.countTotalPending();
-  const offset = Math.max(
-    0,
-    Math.min(ctx.session.paginationOffset ?? 0, newTotal - 1),
-  );
-
-  if (newTotal === 0) {
-    await ctx.editMessageText(
-      ctx.t("admin_order_status_updated", {
-        orderId,
-        status,
-      }),
-    );
-    return;
-  }
-
-  await adminViewOrders(ctx, offset, { orderId });
-}
-
-async function handleAddNotificationJob(
-  ctx: BotContext,
-  newStatus: "confirmed" | "cancelled",
-) {
-  const orderId = parseInt(ctx.match![1]);
-
-  const orderWithUser = await orderRepository.getOrderWithUser(orderId);
-  const userTelegramId = Number(orderWithUser.user.telegramId);
-  const userLocale = availableLocales.includes(
-    orderWithUser.user.languageCode!,
-  )!
-    ? orderWithUser.user.languageCode!
-    : "en";
-
-  await addNotificationJob({
-    userTelegramId,
-    orderId,
-    newStatus,
-    userLocale,
-  });
-}
-
-export async function adminOrderPagination(ctx: BotContext) {
-  const offset = parseInt(ctx.match![1]);
-  adminViewOrders(ctx, offset);
-}
-
 export async function adminStats(ctx: BotContext) {
   if (!isAdmin(ctx)) return;
+
+  Logger.info(`Admin ${ctx.from?.id} requested stats`);
 
   const stats = await orderRepository.getStats();
 
@@ -281,9 +84,12 @@ export async function adminBroadcast(ctx: BotContext) {
     return;
   }
 
+  Logger.info(`Admin ${ctx.from?.id} started broadcast`);
+
   const users = await userRepository.findAll();
 
   if (users.length === 0) {
+    Logger.warn("Broadcast attempted but no users found in database");
     await ctx.reply(ctx.t("admin_broadcast_started", { count: 0 }));
     await ctx.reply(ctx.t("admin_broadcast_success", { success: 0, failed: 0 }));
     return;
