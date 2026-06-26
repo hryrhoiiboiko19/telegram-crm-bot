@@ -5,6 +5,7 @@ import { Logger } from "../../utils/logger/index.js";
 import { i18nMiddleware } from "../middlewares/i18n.middleware.js";
 import { BotContext } from "../types/index.js";
 import { Context } from "grammy";
+import { OrderInsertSchema, UserInsertSchema } from "../../database/validation.js";
 
 export async function orderConversation(
   conversation: Conversation<Context, BotContext>,
@@ -14,12 +15,46 @@ export async function orderConversation(
   const t = (key: string) => i18nMiddleware.translate(locale, key);
 
   ctx.reply(t("service_request"));
-  let pending = await conversation.waitFor("message:text");
-  const serviceType = pending.message.text;
+
+  let serviceType: string;
+  while (true) {
+    const pending = await conversation.wait();
+    const text = pending.message?.text ?? "";
+    const result = OrderInsertSchema.shape.serviceType.safeParse(text);
+
+    if (result.success) {
+      serviceType = result.data;
+      break;
+    }
+
+    Logger.warn([
+      "Invalid serviceType entered",
+      `raw: "${text}"`,
+      `user: ${ctx.from?.id}`,
+    ]);
+    ctx.reply(t("invalid_service_type"));
+  }
 
   ctx.reply(t("serivce_problem_description"));
-  pending = await conversation.waitFor("message:text");
-  const description = pending.message.text;
+
+  let description: string | null;
+  while (true) {
+    const pending = await conversation.wait();
+    const text = pending.message?.text ?? "";
+    const result = OrderInsertSchema.shape.description.safeParse(text);
+
+    if (result.success) {
+      description = result.data ?? null;
+      break;
+    }
+
+    Logger.warn([
+      "Invalid description entered",
+      `raw: "${text}"`,
+      `user: ${ctx.from?.id}`,
+    ]);
+    ctx.reply(t("invalid_description"));
+  }
 
   ctx.reply(t("contact_request"), {
     reply_markup: {
@@ -34,8 +69,27 @@ export async function orderConversation(
       one_time_keyboard: true,
     },
   });
-  const pendingContact = await conversation.waitFor(":contact");
-  const contact = pendingContact.message!.contact.phone_number;
+
+  let contact: string;
+  while (true) {
+    const pending = await conversation.wait();
+    const message = pending.message!;
+    const candidate = message.contact?.phone_number ?? message.text ?? "";
+
+    const phoneResult = UserInsertSchema.shape.phone.safeParse(candidate);
+
+    if (phoneResult.success) {
+      contact = phoneResult.data as string;
+      break;
+    }
+
+    Logger.warn([
+      "Invalid phone entered",
+      `raw: "${candidate}"`,
+      `user: ${ctx.from?.id}`,
+    ]);
+    ctx.reply(t("invalid_phone_format"));
+  }
 
   Logger.info("Conversation data collect is end, saving to Database...");
 
