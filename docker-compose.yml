@@ -2,16 +2,13 @@ services:
   bot:
     build:
       context: .
-      target: development # or "production"
     container_name: tgcrm_bot
     restart: unless-stopped
     ports:
       - "3000:3000"
-    volumes:
-      - ./src:/app/src
     environment:
       - BOT_TOKEN=${BOT_TOKEN}
-      - BOT_MODE=${BOT_MODE} # polling / webhook
+      - BOT_MODE=${BOT_MODE}
       - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-crm_db}
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}

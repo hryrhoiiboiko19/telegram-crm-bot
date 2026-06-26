@@ -1,0 +1,6 @@
+services:
+  bot:
+    build:
+      target: development
+    volumes:
+      - ./src:/app/src
