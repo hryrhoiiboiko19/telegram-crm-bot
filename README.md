@@ -124,6 +124,42 @@ src/
 | `/stats`               | Admins   | Shows business analytics report            |
 | `/broadcast <message>` | Admins   | Sends a message to all users               |
 
+## Google Sheets Integration
+
+The bot exports orders to a Google Spreadsheet via an Apps Script Web App. To set it up:
+
+1. Create a Google Spreadsheet with a sheet named **"Orders"**.
+2. Open **Extensions → Apps Script** and paste the following code:
+
+```javascript
+function doPost(e) {
+  try {
+    var payload = JSON.parse(e.postData.contents);
+    var rowsToInsert = payload.data;
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Orders");
+
+    if (rowsToInsert && rowsToInsert.length > 0) {
+      for (var i = 0; i < rowsToInsert.length; i++) {
+        var currentOrderRow = rowsToInsert[i];
+        var finalRowData = [new Date()].concat(currentOrderRow);
+        sheet.appendRow(finalRowData);
+      }
+    }
+
+    return ContentService.createTextOutput(JSON.stringify({"status": "success"}))
+                         .setMimeType(ContentService.MimeType.JSON);
+  } catch(error) {
+    return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": error.toString()}))
+                         .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+```
+
+3. **Deploy** as a Web App (`Deploy → New deployment → Web app`) with access set to "Anyone".
+4. Copy the deployment URL and set it as `GOOGLE_SHEETS_WEBHOOK_URL` in your `.env`.
+
+> Each exported row is written as: `Timestamp | Order ID | User ID | Service Type | Description | Status`
+
 ## AI Development Disclosure
 
 This project was developed using **LLM-assisted coding** — a combination of:
