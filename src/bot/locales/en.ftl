@@ -2,6 +2,7 @@
 start = Welcome to the CRM bot! Type /order to place an order.
 unknown_command = Unknown command. Type /start for usage instructions.
 internal_server_error = ⚠️ An internal error occurred. Please try again later or contact support.
+rate_limit_exceeded = 🛑 Too many requests! Please slow down.
 
 ## ===== Order conversation =====
 service_request = Please send the type of service you want to request.

@@ -6,7 +6,7 @@ import {
   conversations,
   createConversation,
 } from "@grammyjs/conversations";
-import { i18nMiddleware, loggerMiddleware, setupErrorBoundary } from "./middlewares/index.js";
+import { i18nMiddleware, loggerMiddleware, setupErrorBoundary, createRateLimitMiddleware } from "./middlewares/index.js";
 import { orderConversation } from "./conversations/index.js";
 import {
   admin,
@@ -30,11 +30,12 @@ function initial(): SessionData {
   return { paginationOffset: null };
 }
 
-const redis = new Redis(env.REDIS);
+export const redis = new Redis(env.REDIS);
 
 const redisAdapter = new RedisAdapter({ instance: redis });
 
 bot.use(session({ initial, storage: redisAdapter }));
+bot.use(createRateLimitMiddleware(redis));
 bot.use(loggerMiddleware);
 bot.use(i18nMiddleware);
 bot.use(conversations());

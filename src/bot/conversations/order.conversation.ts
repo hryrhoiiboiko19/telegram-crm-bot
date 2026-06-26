@@ -76,7 +76,10 @@ export async function orderConversation(
   while (true) {
     const pending = await conversation.wait();
     const message = pending.message!;
-    const candidate = message.contact?.phone_number ?? message.text ?? "";
+    const rawCandidate = message.contact?.phone_number ?? message.text ?? "";
+    const candidate = rawCandidate.startsWith("+")
+      ? rawCandidate
+      : `+${rawCandidate}`;
 
     const phoneResult = UserInsertSchema.shape.phone.safeParse(candidate);
 
