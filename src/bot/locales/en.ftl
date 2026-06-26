@@ -14,4 +14,10 @@ admin_successfull_export=Data successfully exported! Check your spreadsheet.
 admin_failed_export=Export failed. Please check backend container logs.
 admin_order_approve=✅ Confirm
 admin_order_cancel=❌ Cancel
+admin_get_stats = 📊 There is all-time stats of:
+  ------------------------
+  ⏳ Pending orders: {$pending}
+  ✅ Confirmed orders: {$confirmed}
+  📈 Conversion Rate: {$conversionRate}%
+  🛠️ Most popular service: "{$mostPopularService}"
 order_update_notification=🔔 Update on Order #{$orderId} The status of your order has been updated to: {$status}

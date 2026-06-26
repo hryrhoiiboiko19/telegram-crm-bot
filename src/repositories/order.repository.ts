@@ -1,9 +1,10 @@
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, count } from "drizzle-orm";
 import {
   NewOrder,
   Order,
   orders,
   OrderStatus,
+  orderStatusEnum,
   users,
 } from "../database/schema.js";
 import { Logger } from "../utils/logger/index.js";
@@ -173,6 +174,62 @@ export const orderRepository = {
 
       return result[0] || null;
     } catch (error) {
+      Logger.error([
+        "An error occured during collectoin order with user: ",
+        error as Error,
+      ]);
+      throw error;
+    }
+  },
+
+  async getStats() {
+    try {
+      Logger.info("Start collecting stats for admin dashboard");
+
+      const groupedByStatus = await db
+        .select({
+          count: count(orders.id),
+          status: orders.status,
+        })
+        .from(orders)
+        .groupBy(orders.status);
+
+      const mostPopularService = await db
+        .select({
+          count: count(orders.id),
+          serviceType: orders.serviceType,
+        })
+        .from(orders)
+        .groupBy(orders.serviceType)
+        .orderBy(desc(count(orders.id)))
+        .limit(1);
+
+      const pending =
+        groupedByStatus.find((x) => x.status === orderStatusEnum.enumValues[0])
+          ?.count ?? 0;
+      const confirmed =
+        groupedByStatus.find((x) => x.status === orderStatusEnum.enumValues[1])
+          ?.count ?? 0;
+      const completed =
+        groupedByStatus.find((x) => x.status === orderStatusEnum.enumValues[2])
+          ?.count ?? 0;
+      const cancelled =
+        groupedByStatus.find((x) => x.status === orderStatusEnum.enumValues[3])
+          ?.count ?? 0;
+      const conversionRate = completed / (completed + cancelled) || 0 * 100;
+
+      return {
+        pending,
+        confirmed,
+        mostPopularService: mostPopularService[0].serviceType,
+        conversionRate,
+      };
+    } catch (error) {
+      Logger.error([
+        "An error occured during collecting stats for admin dashboard",
+        error as Error,
+      ]);
+
       throw error;
     }
   },

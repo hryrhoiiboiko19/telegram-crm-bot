@@ -1,17 +1,14 @@
 import { InlineKeyboardButton } from "grammy/types";
-import { env } from "../../config/env.js";
 import { BotContext } from "../types/index.js";
 import { orderRepository } from "../../repositories/order.repository.js";
 import { Order } from "../../database/schema.js";
 import { googleSheetsService } from "../../services/google-sheets.service.js";
 import { addNotificationJob } from "../../queue/notification.queue.js";
-import { adminIds, availableLocales } from "../constants/index.js";
+import { availableLocales } from "../constants/index.js";
+import { isAdmin } from "../helpers/index.js";
 
 export async function admin(ctx: BotContext) {
-  if (!adminIds.includes(String(ctx.from?.id))) {
-    await ctx.reply(ctx.t("admin_access_denied"));
-    return;
-  }
+  if (!isAdmin(ctx)) return;
 
   const inline_keyboard: InlineKeyboardButton[][] = [
     [
@@ -235,4 +232,12 @@ async function handleAddNotificationJob(
 export async function adminOrderPagination(ctx: BotContext) {
   const offset = parseInt(ctx.match![1]);
   adminViewOrders(ctx, offset);
+}
+
+export async function adminStats(ctx: BotContext) {
+  if (!isAdmin(ctx)) return;
+
+  const stats = await orderRepository.getStats();
+
+  ctx.reply(ctx.t("admin_get_stats", { ...stats }));
 }
