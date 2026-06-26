@@ -8,11 +8,11 @@ export function startNotificationWorker() {
   const worker = new Worker<NotificationJobData>(
     NOTIFICATION_QUEUE_NAME,
     async (job: Job<NotificationJobData>) => {
-      const { userId, orderId, userLocale, newStatus } = job.data;
-      Logger.info(`Processing job ${job.id} for user ${userId}`);
+      const { userTelegramId, orderId, userLocale, newStatus } = job.data;
+      Logger.info(`Processing job ${job.id} for user ${userTelegramId}`);
 
       await notificationService.sendStatusUpdate(
-        userId,
+        userTelegramId,
         orderId,
         userLocale,
         newStatus,

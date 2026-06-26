@@ -1,5 +1,11 @@
 import { eq, desc } from "drizzle-orm";
-import { NewOrder, Order, orders, OrderStatus } from "../database/schema.js";
+import {
+  NewOrder,
+  Order,
+  orders,
+  OrderStatus,
+  users,
+} from "../database/schema.js";
 import { Logger } from "../utils/logger/index.js";
 import { db } from "../config/database.js";
 
@@ -145,6 +151,28 @@ export const orderRepository = {
         `Failed to update status for order ID: ${orderId}`,
         error as Error,
       ]);
+      throw error;
+    }
+  },
+
+  async getOrderWithUser(orderId: number) {
+    try {
+      const result = await db
+        .select({
+          orderId: orders.id,
+          status: orders.id,
+          user: {
+            telegramId: users.telegramId,
+            languageCode: users.languageCode,
+          },
+        })
+        .from(orders)
+        .innerJoin(users, eq(orders.userId, users.id))
+        .where(eq(orders.id, orderId))
+        .limit(1);
+
+      return result[0] || null;
+    } catch (error) {
       throw error;
     }
   },

@@ -1,5 +1,5 @@
 export interface NotificationJobData {
-  userId: number;
+  userTelegramId: number;
   userLocale: string;
   orderId: number;
   newStatus: string;

@@ -20,6 +20,7 @@ export const users = pgTable("users", {
   telegramId: varchar("telegram_id", { length: 255 }).notNull().unique(),
   username: varchar("username", { length: 255 }),
   firstName: varchar("first_name", { length: 255 }),
+  languageCode: varchar("language_code", { length: 3 }),
   phone: varchar("phone", { length: 50 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

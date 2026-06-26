@@ -1,4 +1,4 @@
-start = Hello world!
+start = Welcome to bot! Type /order to make order
 unknown_command = Unkown command, type /start for instructions to use the bot
 contact_request = Send us your contact
 send_contact = Send
@@ -14,4 +14,4 @@ admin_successfull_export=Data successfully exported! Check your spreadsheet.
 admin_failed_export=Export failed. Please check backend container logs.
 admin_order_approve=✅ Confirm
 admin_order_cancel=❌ Cancel
-order_update_notification=`🔔 **Update on Order #{$orderId}**\n\nThe status of your order has been updated to: **{$status}**`;
+order_update_notification=🔔 Update on Order #{$orderId} The status of your order has been updated to: {$status}

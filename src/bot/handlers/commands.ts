@@ -14,6 +14,7 @@ export async function start(ctx: BotContext) {
   Logger.info(`Creating user with telegramId: ${telegramId}`);
   const user = await userRepository.create({
     telegramId,
+    languageCode: ctx.from?.language_code,
     username: ctx.from?.username,
     firstName: ctx.from?.first_name,
   });

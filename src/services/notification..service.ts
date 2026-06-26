@@ -4,7 +4,7 @@ import { Logger } from "../utils/logger/index.js";
 
 export interface INotificationSerivce {
   sendStatusUpdate: (
-    userId: number,
+    userTelegramId: number,
     orderId: number,
     userLocale: string,
     status: string,
@@ -13,7 +13,7 @@ export interface INotificationSerivce {
 
 export class NotificationService implements INotificationSerivce {
   async sendStatusUpdate(
-    userId: number,
+    userTelegramId: number,
     orderId: number,
     userLocale: string,
     status: string,
@@ -23,11 +23,13 @@ export class NotificationService implements INotificationSerivce {
     try {
       const message = `${i18n.translate(userLocale, "order_update_notification", { orderId, status })}`;
 
-      await bot.api.sendMessage(userId, message, { parse_mode: "Markdown" });
-      Logger.info(`Notification sent to user ${userId} for order ${orderId}`);
+      await bot.api.sendMessage(userTelegramId, message);
+      Logger.info(
+        `Notification sent to user ${userTelegramId} for order ${orderId}`,
+      );
     } catch (error) {
       Logger.error([
-        `Failed to send telegram message to ${userId}:`,
+        `Failed to send telegram message to ${userTelegramId}:`,
         error as Error,
       ]);
 

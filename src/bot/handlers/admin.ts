@@ -4,7 +4,6 @@ import { BotContext } from "../types/index.js";
 import { orderRepository } from "../../repositories/order.repository.js";
 import { Order } from "../../database/schema.js";
 import { googleSheetsService } from "../../services/google-sheets.service.js";
-import { userRepository } from "../../repositories/user.repository.js";
 import { addNotificationJob } from "../../queue/notification.queue.js";
 import { availableLocales } from "../constants/index.js";
 
@@ -217,15 +216,18 @@ async function handleAddNotificationJob(
   ctx: BotContext,
   newStatus: "confirmed" | "cancelled",
 ) {
-  const user = await userRepository.findByTelegramId(String(ctx.from?.id));
-  const userId = user!.id;
   const orderId = parseInt(ctx.match![1]);
-  const userLocale = availableLocales.includes(ctx.from!.language_code!)
-    ? ctx.from!.language_code!
+
+  const orderWithUser = await orderRepository.getOrderWithUser(orderId);
+  const userTelegramId = Number(orderWithUser.user.telegramId);
+  const userLocale = availableLocales.includes(
+    orderWithUser.user.languageCode!,
+  )!
+    ? orderWithUser.user.languageCode!
     : "en";
 
   await addNotificationJob({
-    userId,
+    userTelegramId,
     orderId,
     newStatus,
     userLocale,
