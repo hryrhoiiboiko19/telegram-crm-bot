@@ -16,7 +16,7 @@ export async function orderConversation(
 
   Logger.info(`Order conversation started for user ${ctx.from?.id}`);
 
-  ctx.reply(t("service_request"));
+  await ctx.reply(t("service_request"));
 
   let serviceType: string;
   while (true) {
@@ -34,10 +34,10 @@ export async function orderConversation(
       `raw: "${text}"`,
       `user: ${ctx.from?.id}`,
     ]);
-    ctx.reply(t("invalid_service_type"));
+    await ctx.reply(t("invalid_service_type"));
   }
 
-  ctx.reply(t("service_problem_description"));
+  await ctx.reply(t("service_problem_description"));
 
   let description: string | null;
   while (true) {
@@ -55,10 +55,10 @@ export async function orderConversation(
       `raw: "${text}"`,
       `user: ${ctx.from?.id}`,
     ]);
-    ctx.reply(t("invalid_description"));
+    await ctx.reply(t("invalid_description"));
   }
 
-  ctx.reply(t("contact_request"), {
+  await ctx.reply(t("contact_request"), {
     reply_markup: {
       keyboard: [
         [
@@ -93,7 +93,7 @@ export async function orderConversation(
       `raw: "${candidate}"`,
       `user: ${ctx.from?.id}`,
     ]);
-    ctx.reply(t("invalid_phone_format"));
+    await ctx.reply(t("invalid_phone_format"));
   }
 
   Logger.info("Conversation data collect is end, saving to Database...");
@@ -112,5 +112,5 @@ export async function orderConversation(
 
   Logger.info("Successfully saved data to Database!");
 
-  ctx.reply(t("order_received"));
+  await ctx.reply(t("order_received"));
 }

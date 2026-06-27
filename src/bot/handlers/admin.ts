@@ -7,7 +7,7 @@ import { isAdmin } from "../helpers/index.js";
 import { Logger } from "../../utils/logger/index.js";
 
 export async function admin(ctx: BotContext) {
-  if (!isAdmin(ctx)) return;
+  if (!(await isAdmin(ctx))) return;
 
   Logger.info(`Admin panel opened by user ${ctx.from?.id}`);
 
@@ -52,13 +52,13 @@ export async function adminExportSheets(ctx: BotContext) {
 }
 
 export async function adminStats(ctx: BotContext) {
-  if (!isAdmin(ctx)) return;
+  if (!(await isAdmin(ctx))) return;
 
   Logger.info(`Admin ${ctx.from?.id} requested stats`);
 
   const stats = await orderRepository.getStats();
 
-  ctx.reply(
+  await ctx.reply(
     ctx.t("admin_get_stats", {
       pending: stats.pending,
       confirmed: stats.confirmed,
@@ -75,7 +75,7 @@ const BROADCAST_DELAY_MS = 50;
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export async function adminBroadcast(ctx: BotContext) {
-  if (!isAdmin(ctx)) return;
+  if (!(await isAdmin(ctx))) return;
 
   const message = typeof ctx.match === "string" ? ctx.match : "";
 

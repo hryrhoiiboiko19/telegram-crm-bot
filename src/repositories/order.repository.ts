@@ -9,6 +9,7 @@ import {
 } from "../database/schema.js";
 import { Logger } from "../utils/logger/index.js";
 import { db } from "../config/database.js";
+import { botOrdersTotal } from "../metrics/index.js";
 
 export const orderRepository = {
   /**
@@ -21,6 +22,7 @@ export const orderRepository = {
       Logger.info(
         `Successfully created order ID: ${newOrder.id} for user ID: ${newOrder.userId}`,
       );
+      botOrdersTotal.inc({ status: "created" });
       return newOrder;
     } catch (error) {
       Logger.error(["Failed to create new order", error as Error]);
@@ -104,15 +106,17 @@ export const orderRepository = {
 
   async countTotalPending(): Promise<number> {
     try {
-      const results = await db
-        .select()
+      const [row] = await db
+        .select({ count: count() })
         .from(orders)
-        .where((order) => eq(order.status, "pending"));
+        .where(eq(orders.status, "pending"));
+
+      const total = Number(row?.count ?? 0);
 
       Logger.info(
-        `Fetched count of orders from database with status "pending". Total count: ${results.length}`,
+        `Fetched count of orders from database with status "pending". Total count: ${total}`,
       );
-      return results.length;
+      return total;
     } catch (error) {
       Logger.error([
         "Failed to fetch count of orders with status 'pending' from database",
@@ -140,6 +144,7 @@ export const orderRepository = {
         Logger.info(
           `Successfully updated status for order ID: ${orderId} to '${status}'`,
         );
+        botOrdersTotal.inc({ status });
       } else {
         Logger.warn(
           `Attempted to update status for non-existent order ID: ${orderId}`,
@@ -161,7 +166,7 @@ export const orderRepository = {
       const result = await db
         .select({
           orderId: orders.id,
-          status: orders.id,
+          status: orders.status,
           user: {
             telegramId: users.telegramId,
             languageCode: users.languageCode,
@@ -175,7 +180,7 @@ export const orderRepository = {
       return result[0] || null;
     } catch (error) {
       Logger.error([
-        "An error occured during collectoin order with user: ",
+        "An error occurred during collecting order with user: ",
         error as Error,
       ]);
       throw error;

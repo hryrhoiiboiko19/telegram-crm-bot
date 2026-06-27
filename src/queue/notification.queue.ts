@@ -10,7 +10,9 @@ export const notificationQueue = new Queue<NotificationJobData>(
   },
 );
 
-export async function addNotificationJob(data: NotificationJobData) {
+export async function addNotificationJob(
+  data: NotificationJobData,
+): Promise<boolean> {
   try {
     const jobName = `status_update_order_${data.orderId}`;
     await notificationQueue.add(jobName, data, {
@@ -23,7 +25,9 @@ export async function addNotificationJob(data: NotificationJobData) {
       removeOnFail: false,
     });
     Logger.info(`Job ${jobName} successfully added to the queue.`);
+    return true;
   } catch (error) {
     Logger.error(["Failed to add job to notification queue:", error as Error]);
+    return false;
   }
 }

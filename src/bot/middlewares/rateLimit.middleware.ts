@@ -2,9 +2,10 @@ import type { Redis } from "ioredis";
 import type { Middleware } from "grammy";
 import { Logger } from "../../utils/logger/index.js";
 import { i18nMiddleware } from "./i18n.middleware.js";
+import { botRateLimitRejectionsTotal } from "../../metrics/index.js";
 
-const RATE_LIMIT_MAX_REQUESTS = 3;
-const RATE_LIMIT_WINDOW_SECONDS = 1;
+const RATE_LIMIT_MAX_REQUESTS = 30;
+const RATE_LIMIT_WINDOW_SECONDS = 60;
 
 export function createRateLimitMiddleware(redis: Redis): Middleware {
   return async (ctx, next) => {
@@ -25,6 +26,7 @@ export function createRateLimitMiddleware(redis: Redis): Middleware {
 
       if (count > RATE_LIMIT_MAX_REQUESTS) {
         Logger.warn(`User ${userId} is rate-limited.`);
+        botRateLimitRejectionsTotal.inc();
 
         const locale = ctx.from?.language_code ?? "en";
         const message = i18nMiddleware.translate(
@@ -33,6 +35,9 @@ export function createRateLimitMiddleware(redis: Redis): Middleware {
         );
 
         await ctx.reply(message);
+        if (ctx.callbackQuery) {
+          await ctx.answerCallbackQuery();
+        }
         return;
       }
     } catch (error) {

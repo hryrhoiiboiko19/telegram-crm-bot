@@ -25,6 +25,7 @@ COPY src ./src
 RUN npm run build
 
 RUN cp -r src/database/migrations dist/database/migrations
+RUN cp -r src/bot/locales dist/bot/locales
 
 FROM base AS production
 
@@ -34,6 +35,8 @@ RUN npm ci --omit=dev
 
 COPY --from=builder /app/dist ./dist
 
-EXPOSE 3000
+COPY package.json ./
 
-CMD npm run db:migrate:prod && npm start
+EXPOSE 3000 9100
+
+CMD ["sh", "-c", "npm run db:migrate:prod && npm start"]

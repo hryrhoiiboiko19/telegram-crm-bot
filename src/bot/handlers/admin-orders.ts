@@ -23,7 +23,7 @@ export async function adminViewOrders(
 
   const activeOrder = await orderRepository.findPendingOrder(paginationOffset);
 
-  renderOrders(
+  await renderOrders(
     ctx,
     activeOrder,
     paginationOffset,
@@ -33,7 +33,7 @@ export async function adminViewOrders(
   );
 }
 
-function renderOrders(
+async function renderOrders(
   ctx: BotContext,
   order: Order | null,
   paginationOffset: number,
@@ -42,7 +42,7 @@ function renderOrders(
   recentOrderUpdated: { orderId: number },
 ) {
   if (!order) {
-    ctx.reply(ctx.t("admin_no_pending_orders"));
+    await ctx.reply(ctx.t("admin_no_pending_orders"));
     return;
   }
 
@@ -70,26 +70,25 @@ function renderOrders(
     },
   };
   if (haveToReply) {
-    ctx.reply(orderDescription, msgMarkup);
+    await ctx.reply(orderDescription, msgMarkup);
   } else {
-    ctx.editMessageText(orderDescription, msgMarkup);
+    await ctx.editMessageText(orderDescription, msgMarkup);
   }
 }
 
 export async function adminConfirmOrder(ctx: BotContext) {
-  await handleOrderStatusUpdate(ctx, "confirmed", "CONFIRMED");
+  await handleOrderStatusUpdate(ctx, "confirmed");
   await handleAddNotificationJob(ctx, "confirmed");
 }
 
 export async function adminCancelOrder(ctx: BotContext) {
-  await handleOrderStatusUpdate(ctx, "cancelled", "CANCELLED");
+  await handleOrderStatusUpdate(ctx, "cancelled");
   await handleAddNotificationJob(ctx, "cancelled");
 }
 
 async function handleOrderStatusUpdate(
   ctx: BotContext,
   dbStatus: "confirmed" | "cancelled",
-  status: "CONFIRMED" | "CANCELLED",
 ): Promise<void> {
   await ctx.answerCallbackQuery();
 
@@ -107,7 +106,7 @@ async function handleOrderStatusUpdate(
   if (newTotal === 0) {
     Logger.info(`No pending orders left after order #${orderId} update`);
     await ctx.editMessageText(
-      ctx.t("admin_order_status_updated", { orderId, status }),
+      ctx.t("admin_order_status_updated", { orderId, status: dbStatus }),
     );
     return;
   }
@@ -142,5 +141,5 @@ async function handleAddNotificationJob(
 export async function adminOrderPagination(ctx: BotContext) {
   const offset = parseInt(ctx.match![1]);
   Logger.info(`Admin paginating orders, offset: ${offset}`);
-  adminViewOrders(ctx, offset);
+  await adminViewOrders(ctx, offset);
 }

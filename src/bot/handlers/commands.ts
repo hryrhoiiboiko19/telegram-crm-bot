@@ -7,7 +7,7 @@ export async function start(ctx: BotContext) {
   const existing = await userRepository.findByTelegramId(telegramId);
   if (existing) {
     Logger.info(`User already exists with telegramId: ${telegramId}`);
-    ctx.reply(ctx.t("start"));
+    await ctx.reply(ctx.t("start"));
     return;
   }
 
@@ -21,5 +21,5 @@ export async function start(ctx: BotContext) {
   Logger.info(
     `Successfully created user with telegramId: ${telegramId}, id: ${user.id}`,
   );
-  ctx.reply(ctx.t("start"));
+  await ctx.reply(ctx.t("start"));
 }
