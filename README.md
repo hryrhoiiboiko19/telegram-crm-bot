@@ -62,7 +62,10 @@ src/
 │   └── ...
 ├── database/
 │   ├── schema.ts                # Drizzle table definitions
-│   └── validation.ts            # Zod schemas (UserInsert, OrderInsert)
+│   ├── validation.ts            # Zod schemas (UserInsert, OrderInsert)
+│   ├── migrations/              # Generated SQL migrations
+│   ├── migrate.ts              # Programmatic migrator (prod)
+│   └── seed.ts                  # Development seed data
 ├── repositories/                # Data access layer
 ├── services/                    # Google Sheets export, notifications
 ├── queue/                       # BullMQ queue + worker
@@ -103,11 +106,16 @@ src/
 
 4. **Run database migrations**
 
+   For local development:
+
    ```bash
    npm run db:push    # push schema directly
    # or
    npm run db:generate && npm run db:migrate
    ```
+
+   In production (Docker), migrations run automatically before the bot starts via
+   `npm run db:migrate:prod`. No manual step is required.
 
 5. **Local development** (without Docker)
    ```bash

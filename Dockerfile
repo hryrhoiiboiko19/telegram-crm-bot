@@ -24,6 +24,8 @@ COPY src ./src
 
 RUN npm run build
 
+RUN cp -r src/database/migrations dist/database/migrations
+
 FROM base AS production
 
 ENV NODE_ENV=production
@@ -34,4 +36,4 @@ COPY --from=builder /app/dist ./dist
 
 EXPOSE 3000
 
-CMD ["npm", "start"]
+CMD npm run db:migrate:prod && npm start
