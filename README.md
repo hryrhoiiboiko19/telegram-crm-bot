@@ -1,20 +1,22 @@
 # Telegram CRM Bot
 
-[![CI](https://github.com/bhh/telegram-crm-bot/actions/workflows/ci.yml/badge.svg)](https://github.com/bhh/telegram-crm-bot/actions/workflows/ci.yml)
-[![CD](https://github.com/bhh/telegram-crm-bot/actions/workflows/cd.yml/badge.svg)](https://github.com/bhh/telegram-crm-bot/actions/workflows/cd.yml)
-[![codecov](https://codecov.io/github/bhh/telegram-crm-bot/branch/main/graph/badge.svg)](https://codecov.io/github/bhh/telegram-crm-bot)
+[![CI](https://github.com/hryrhoiiboiko19/telegram-crm-bot/actions/workflows/ci.yml/badge.svg)](https://github.com/hryrhoiiboiko19/telegram-crm-bot/actions/workflows/ci.yml)
+[![CD](https://github.com/hryrhoiiboiko19/telegram-crm-bot/actions/workflows/cd.yml/badge.svg)](https://github.com/hryrhoiiboiko19/telegram-crm-bot/actions/workflows/cd.yml)
+[![codecov](https://codecov.io/github/hryrhoiiboiko19/telegram-crm-bot/branch/main/graph/badge.svg)](https://codecov.io/github/hryrhoiiboiko19/telegram-crm-bot)
 
 A CRM Telegram bot for service businesses. Handles customer order intake through step-by-step conversations, provides an admin panel for order management, exports data to Google Sheets, and ships with Prometheus metrics, BullMQ background queues, and full Docker + CI/CD pipeline.
 
 ## Features
 
 ### Customer-facing
+
 - **Step-by-step order intake** — guided conversation collects service type, problem description, and phone number
 - **Input validation (Zod)** — strict validation; invalid data triggers a retry prompt instead of polluting the database
 - **Multi-language support** — English and Ukrainian locales, auto-selected from the user's Telegram language code
 - **Order status notifications** — users receive a Telegram message when their order is confirmed or cancelled (queued via BullMQ)
 
 ### Admin panel (`/admin`)
+
 - **View pending orders** — paginated list with inline keyboard buttons
 - **Confirm / cancel orders** — one-click status updates with automatic customer notification
 - **Business analytics (`/stats`)** — pending/confirmed/completed/cancelled counts, conversion rate, most popular service
@@ -23,6 +25,7 @@ A CRM Telegram bot for service businesses. Handles customer order intake through
 - **Admin access control** — restricted to whitelisted Telegram user IDs
 
 ### Infrastructure
+
 - **Prometheus metrics** — `prom-client` exposes `/metrics` and `/healthz` on port 9100
 - **Queue instrumentation** — BullMQ job counts, processing duration histograms, completed/failed counters
 - **Docker Compose** — PostgreSQL, Redis, Prometheus, and Grafana with auto-provisioned datasources
@@ -78,17 +81,17 @@ graph TB
 
 ## Tech Stack
 
-| Layer           | Technology                                  |
-| --------------- | ------------------------------------------- |
-| Bot framework   | [grammY](https://grammy.dev/)               |
-| ORM             | [Drizzle ORM](https://orm.drizzle.team/)    |
-| Database        | PostgreSQL 17                               |
-| Cache / Queue   | Redis 7 + [BullMQ](https://docs.bullmq.io/) |
-| Validation      | [Zod](https://zod.dev/)                     |
-| Session storage | Redis (`@grammyjs/storage-redis`)           |
-| i18n            | `@grammyjs/i18n` (Fluent)                   |
+| Layer           | Technology                                           |
+| --------------- | ---------------------------------------------------- |
+| Bot framework   | [grammY](https://grammy.dev/)                        |
+| ORM             | [Drizzle ORM](https://orm.drizzle.team/)             |
+| Database        | PostgreSQL 17                                        |
+| Cache / Queue   | Redis 7 + [BullMQ](https://docs.bullmq.io/)          |
+| Validation      | [Zod](https://zod.dev/)                              |
+| Session storage | Redis (`@grammyjs/storage-redis`)                    |
+| i18n            | `@grammyjs/i18n` (Fluent)                            |
 | Metrics         | [prom-client](https://github.com/siimon/prom-client) |
-| Runtime         | Node.js 22 + TypeScript                     |
+| Runtime         | Node.js 22 + TypeScript                              |
 
 ## Project Structure
 
@@ -131,31 +134,38 @@ src/
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js 22+
 - Docker & Docker Compose
 
 ### Setup
 
 1. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 2. **Configure environment**
+
    ```bash
    cp .env.example .env
    ```
+
    Fill in your `.env` — see `.env.example` for descriptions of each variable.
 
 3. **Run with Docker (recommended)**
+
    ```bash
    docker compose up --build
    ```
+
    This starts PostgreSQL, Redis, the bot, Prometheus, and Grafana together.
 
 4. **Run database migrations**
 
    For local development:
+
    ```bash
    npm run db:push    # push schema directly
    # or
@@ -191,27 +201,30 @@ npm run lint            # ESLint
 ## Observability
 
 ### Metrics (`/metrics`)
+
 The bot exposes Prometheus metrics on `METRICS_PORT` (default 9100):
 
-| Metric                              | Type      | Labels                        |
-| ------------------------------------|-----------|-------------------------------|
-| `crm_bot_commands_total`            | Counter   | `command`                     |
-| `crm_bot_callbacks_total`           | Counter   | `action`                      |
-| `crm_bot_orders_total`              | Counter   | `status`                      |
-| `crm_bot_notifications_total`       | Counter   | `result`                     |
-| `crm_bot_rate_limit_rejections_total`| Counter  | —                             |
-| `crm_bot_errors_total`             | Counter   | `type`                       |
-| `crm_http_request_duration_seconds` | Histogram | `route`, `method`, `status`  |
-| `crm_queue_jobs_total`              | Counter   | `queue`, `state`             |
-| `crm_queue_jobs_processed_total`    | Counter   | `queue`, `result`            |
-| `crm_queue_job_duration_seconds`    | Histogram | `queue`                      |
+| Metric                                | Type      | Labels                      |
+| ------------------------------------- | --------- | --------------------------- |
+| `crm_bot_commands_total`              | Counter   | `command`                   |
+| `crm_bot_callbacks_total`             | Counter   | `action`                    |
+| `crm_bot_orders_total`                | Counter   | `status`                    |
+| `crm_bot_notifications_total`         | Counter   | `result`                    |
+| `crm_bot_rate_limit_rejections_total` | Counter   | —                           |
+| `crm_bot_errors_total`                | Counter   | `type`                      |
+| `crm_http_request_duration_seconds`   | Histogram | `route`, `method`, `status` |
+| `crm_queue_jobs_total`                | Counter   | `queue`, `state`            |
+| `crm_queue_jobs_processed_total`      | Counter   | `queue`, `result`           |
+| `crm_queue_job_duration_seconds`      | Histogram | `queue`                     |
 
 Plus default Node.js and process metrics via `collectDefaultMetrics`.
 
 ### Health (`/healthz`)
+
 Returns `200 ok` if both Redis and PostgreSQL are reachable, `500 error` otherwise.
 
 ### Grafana
+
 Grafana is available at `http://localhost:3001` with Prometheus auto-provisioned as a datasource. Default credentials: `admin` / `admin`.
 
 ## Deployment
@@ -224,13 +237,16 @@ The Dockerfile is multi-stage and produces a slim production image. The CI/CD pi
 - **On version tag `v*.*.*`**: tagged as `v1.2.3`, `v1.2`, and `v1`
 
 Pull and run:
+
 ```bash
 docker pull ghcr.io/<owner>/telegram-crm-bot:latest
 docker run --env-file .env -p 3000:3000 -p 9100:9100 ghcr.io/<owner>/telegram-crm-bot:latest
 ```
 
 ### Webhook mode
+
 Set `WEBHOOK_URL` in `.env` to enable webhook mode. The bot will:
+
 1. Register the webhook with Telegram (`POST /setWebhook`)
 2. Start an HTTP server on `PORT` (default 3000)
 3. Forward updates from `POST /<WEBHOOK_SECRET>` to `bot.handleUpdate`
@@ -238,6 +254,7 @@ Set `WEBHOOK_URL` in `.env` to enable webhook mode. The bot will:
 Leave `WEBHOOK_URL` empty for long-polling (default).
 
 ### Security notes
+
 - **Rotate `BOT_TOKEN` and `REDIS_PASSWORD` regularly.** If `.env` was ever committed, rotate all secrets immediately.
 - `WEBHOOK_SECRET` should be a random string — it acts as a URL-based auth token for the webhook endpoint.
 - `.env` is in `.gitignore` and `.dockerignore` — it should never be committed.
@@ -264,11 +281,13 @@ function doPost(e) {
       }
     }
 
-    return ContentService.createTextOutput(JSON.stringify({"status": "success"}))
-                         .setMimeType(ContentService.MimeType.JSON);
-  } catch(error) {
-    return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": error.toString()}))
-                         .setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(
+      JSON.stringify({ status: "success" }),
+    ).setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    return ContentService.createTextOutput(
+      JSON.stringify({ status: "error", message: error.toString() }),
+    ).setMimeType(ContentService.MimeType.JSON);
   }
 }
 ```
